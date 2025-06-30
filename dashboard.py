@@ -37,16 +37,31 @@ comparison_df = pd.DataFrame({
 })
 st.plotly_chart(px.bar(comparison_df, x='Year', y='Value', title=f"{selected_metric} Comparison"))
 
-col1, col2 = st.columns(2)
-with col1:
-    st.subheader("Top 5 Metric Increases")
-    st.plotly_chart(px.bar(df.sort_values('% Change', ascending=False).head(5),
-                           x='% Change', y='Metric', orientation='h', color_discrete_sequence=['green']))
-with col2:
-    st.subheader("Top 5 Metric Decreases")
-    st.plotly_chart(px.bar(df.sort_values('% Change').head(5),
-                           x='% Change', y='Metric', orientation='h', color_discrete_sequence=['red']))
+# Highlight requested metrics
+highlight_metrics = ['Gross Margin', 'Gross Profit', 'Retail Volume', 'Retail Fill Up', 'Replacement Costs', 'Retail Transactions']
+highlight_df = df[df['Metric'].isin(highlight_metrics)].copy()
 
+st.subheader("🔍 Focus Metrics Overview")
+st.dataframe(highlight_df[['Metric', 'Avg_2024', 'Avg_2025', '% Change']].style.format({
+    'Avg_2024': '{:.2f}',
+    'Avg_2025': '{:.2f}',
+    '% Change': '{:.2f}'
+}))
+
+# Columns for change visualisations
+col1, col2 = st.columns(2)
+
+with col1:
+    st.subheader("Top 10 Metric Increases")
+    top_increases = df.sort_values('% Change', ascending=False).head(10)
+    st.plotly_chart(px.bar(top_increases, x='% Change', y='Metric', orientation='h', color_discrete_sequence=['green']))
+
+with col2:
+    st.subheader("Top 10 Metric Decreases")
+    top_decreases = df.sort_values('% Change').head(10)
+    st.plotly_chart(px.bar(top_decreases, x='% Change', y='Metric', orientation='h', color_discrete_sequence=['red']))
+
+# Table summary
 st.markdown("### 📋 Full Metric Table")
 st.dataframe(df.style.format({
     'Avg_2024': '{:.2f}',
